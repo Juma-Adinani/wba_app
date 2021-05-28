@@ -31,7 +31,7 @@ class HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
 
-    readDetails().whenComplete(() => print(user.toString()));
+    readDetails();
 
     listenForWifiConnection();
   }
@@ -181,23 +181,23 @@ class HomePageState extends State<HomePage> {
                           children: [
                             TableRow(children: [
                               Text("Venue: "),
-                              Text(session.venue),
+                              Text(session?.venue ?? ''),
                             ]),
                             TableRow(children: [
                               Text("Subject: "),
-                              Text(session.subject),
+                              Text(session?.subject ?? ''),
                             ]),
                             TableRow(children: [
                               Text("Programmes: "),
-                              Text(session.programme),
+                              Text(session?.programme ?? ''),
                             ]),
                             TableRow(children: [
                               Text("Start: "),
-                              Text(session.start),
+                              Text(session?.start ?? ''),
                             ]),
                             TableRow(children: [
                               Text("End: "),
-                              Text(session.end),
+                              Text(session?.end ?? ''),
                             ]),
                           ],
                         ),
@@ -208,16 +208,22 @@ class HomePageState extends State<HomePage> {
                 Row(
                   children: [
                     Text(
-                      session?.isBelong ? 'Attendance Status: ' : '',
+                      session != null
+                          ? session.isBelong
+                              ? 'Attendance Status: '
+                              : ''
+                          : '',
                     ),
                     SizedBox(
                       width: 20,
                     ),
                     Text(
-                      session?.isBelong
-                          ? session.isPresent
-                              ? 'Present'
-                              : 'Absent'
+                      session != null
+                          ? session.isBelong
+                              ? session.isPresent
+                                  ? 'Present'
+                                  : 'Absent'
+                              : ''
                           : '',
                     )
                   ],
@@ -245,7 +251,10 @@ class HomePageState extends State<HomePage> {
   /// Read user's details from Shared Preferences
   Future<void> readDetails() async {
     var prefs = await SharedPreferences.getInstance();
-    user = User.fromSharedPrefs(prefs);
+    setState(() {
+      user = User.fromSharedPrefs(prefs);
+      print("user from prefs: $user");
+    });
   }
 
   /// Listen for wifi connectivity
@@ -302,10 +311,11 @@ class HomePageState extends State<HomePage> {
         'reg_no': user.registration,
         'venue': _wifiName,
         'imeis': user.imeis,
-        'timetable_id': session.timetableId
+        // 'timetable_id': session.timetableId
       },
     );
 
+    print("Response: ${response.body}");
     if (response.body.isNotEmpty) {
       Map<String, dynamic> result = json.decode(response.body);
 

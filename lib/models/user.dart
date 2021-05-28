@@ -23,7 +23,7 @@ class User {
   factory User.fromJson(dynamic json) {
     return User(
       name: json['data']['name'],
-      registration: json['data']['registration'],
+      registration: json['data']['reg_no'],
       role: json['data']['role'],
       programme: json['data']['programme'] ?? null,
       yearOfStudy: json['data']['year_of_study'] ?? null,

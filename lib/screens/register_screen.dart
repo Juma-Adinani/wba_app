@@ -182,6 +182,8 @@ class _RegisterPageState extends State<RegisterPage> {
       },
     );
 
+    // print("Response got: " + response.body['data']);
+
     if (response.body.isNotEmpty) {
       Map<String, dynamic> result = json.decode(response.body);
 
