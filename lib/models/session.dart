@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 
 class Session {
@@ -23,7 +25,7 @@ class Session {
 
   factory Session.fromJson(Map<String, dynamic> json) {
     return Session(
-      timetableId: json['data']['timetable_id'],
+      timetableId: int.parse(json['data']['timetable_id']),
       venue: json['data']['venue'],
       subject: json['data']['subject'],
       start: json['data']['start'],

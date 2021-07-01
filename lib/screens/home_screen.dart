@@ -27,12 +27,14 @@ class HomePageState extends State<HomePage> {
   bool _isWifiConnected = false;
   var _wifiName;
 
+  Future<User> readDetailsFuture;
+  Future<dynamic> checkVenueFuture;
+
   @override
   void initState() {
     super.initState();
-
-    readDetails();
-
+    readDetailsFuture = readDetails();
+    checkVenueFuture = _checkVenue();
     listenForWifiConnection();
   }
 
@@ -48,7 +50,18 @@ class HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(user?.name ?? ''),
+          title: Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Home'),
+                IconButton(
+                  icon: Icon(Icons.refresh),
+                  onPressed: () => setState(() {}),
+                )
+              ],
+            ),
+          ),
         ),
         body: SingleChildScrollView(
           child: Padding(
@@ -75,42 +88,7 @@ class HomePageState extends State<HomePage> {
                           ),
                         ),
                       ),
-                      Table(
-                        children: [
-                          TableRow(children: [
-                            Text("Name: "),
-                            Text(user.name ?? '')
-                          ]),
-                          TableRow(children: [
-                            Text("ID: "),
-                            Text(user.registration ?? '')
-                          ]),
-                          TableRow(
-                            children: (user.role.toString().contains('student'))
-                                ? [
-                                    Text("Programme: "),
-                                    Text(user.programme ?? '')
-                                  ]
-                                : [Text(''), Text('')],
-                          ),
-                          TableRow(
-                            children: (user.role.toString().contains('student'))
-                                ? [
-                                    Text("Year of Study: "),
-                                    Text(user.yearOfStudy ?? '')
-                                  ]
-                                : [Text(''), Text('')],
-                          ),
-                          TableRow(
-                            children: (user.role.toString().contains('student'))
-                                ? [
-                                    Text("Semester: "),
-                                    Text(user.semester ?? '')
-                                  ]
-                                : [Text(''), Text('')],
-                          ),
-                        ],
-                      ),
+                      buildUserDetailsTable()
                     ],
                   ),
                 ),
@@ -175,86 +153,124 @@ class HomePageState extends State<HomePage> {
                           ),
                         ),
                       ),
-                      Visibility(
-                        visible: (session != null),
-                        child: Table(
-                          children: [
-                            TableRow(children: [
-                              Text("Venue: "),
-                              Text(session?.venue ?? ''),
-                            ]),
-                            TableRow(children: [
-                              Text("Subject: "),
-                              Text(session?.subject ?? ''),
-                            ]),
-                            TableRow(children: [
-                              Text("Programmes: "),
-                              Text(session?.programme ?? ''),
-                            ]),
-                            TableRow(children: [
-                              Text("Start: "),
-                              Text(session?.start ?? ''),
-                            ]),
-                            TableRow(children: [
-                              Text("End: "),
-                              Text(session?.end ?? ''),
-                            ]),
-                          ],
-                        ),
-                      )
+                      buildSessionDetailsTable(),
                     ],
                   ),
                 ),
-                Row(
-                  children: [
-                    Text(
-                      session != null
-                          ? session.isBelong
-                              ? 'Attendance Status: '
-                              : ''
-                          : '',
-                    ),
-                    SizedBox(
-                      width: 20,
-                    ),
-                    Text(
-                      session != null
-                          ? session.isBelong
-                              ? session.isPresent
-                                  ? 'Present'
-                                  : 'Absent'
-                              : ''
-                          : '',
-                    )
-                  ],
-                ),
-                Visibility(
-                  visible: (session != null),
-                  child: Container(
-                    margin: EdgeInsets.only(top: 16),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // _confirmAttendance(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("Hurraaaay!")));
-                      },
-                      child: Text('Confirm your attendance'),
-                    ),
-                  ),
-                )
               ],
             ),
           ),
         ));
   }
 
+  FutureBuilder buildSessionDetailsTable() {
+    return FutureBuilder(
+      future: checkVenueFuture,
+      builder: (ctx, snapshot) {
+        Widget output = Text("Something went wrong!");
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (!snapshot.hasError && snapshot.data != null) {
+            if (snapshot.data['status'].toString().contains("Ok")) {
+              session = Session.fromJson(snapshot.data);
+              output = Column(
+                children: [
+                  Table(
+                    children: [
+                      TableRow(children: [
+                        Text("Venue: "),
+                        Text(session.venue),
+                      ]),
+                      TableRow(children: [
+                        Text("Subject: "),
+                        Text(session.subject),
+                      ]),
+                      TableRow(children: [
+                        Text("Programmes: "),
+                        Text(session.programme),
+                      ]),
+                      TableRow(children: [
+                        Text("Start: "),
+                        Text(session.start),
+                      ]),
+                      TableRow(children: [
+                        Text("End: "),
+                        Text(session.end),
+                      ]),
+                      TableRow(children: [
+                        Text("Attendance Status: "),
+                        Text(session.isPresent ? 'Present' : 'Absent'),
+                      ]),
+                    ],
+                  ),
+                  SizedBox(height: 40),
+                  (!session.isPresent)
+                      ? Container(
+                          margin: EdgeInsets.only(top: 16),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              _confirmAttendance(context);
+                            },
+                            child: Text('Confirm your attendance'),
+                          ),
+                        )
+                      : Container(),
+                ],
+              );
+            } else if (snapshot.data['status'].toString().contains("Error")) {
+              output = Text(snapshot.data['message']);
+            }
+          }
+        } else if (snapshot.connectionState == ConnectionState.waiting) {
+          output = Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        return output;
+      },
+    );
+  }
+
+  FutureBuilder buildUserDetailsTable() {
+    return FutureBuilder(
+      future: readDetailsFuture,
+      builder: (ctx, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return Table(
+            children: [
+              TableRow(children: [Text("Name: "), Text(user.name)]),
+              TableRow(children: [Text("ID: "), Text(user.registration)]),
+              TableRow(
+                children: (user.role.toString().contains('student'))
+                    ? [Text("Programme: "), Text(user.programme)]
+                    : [Text(''), Text('')],
+              ),
+              TableRow(
+                children: (user.role.toString().contains('student'))
+                    ? [Text("Year of Study: "), Text(user.yearOfStudy)]
+                    : [Text(''), Text('')],
+              ),
+              TableRow(
+                children: (user.role.toString().contains('student'))
+                    ? [Text("Semester: "), Text(user.semester)]
+                    : [Text(''), Text('')],
+              ),
+            ],
+          );
+        } else {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+      },
+    );
+  }
+
   /// Read user's details from Shared Preferences
-  Future<void> readDetails() async {
+  Future<User> readDetails() async {
     var prefs = await SharedPreferences.getInstance();
-    setState(() {
-      user = User.fromSharedPrefs(prefs);
-      print("user from prefs: $user");
-    });
+    user = User.fromSharedPrefs(prefs);
+    print("user from prefs: $user");
+    return user;
   }
 
   /// Listen for wifi connectivity
@@ -285,11 +301,7 @@ class HomePageState extends State<HomePage> {
                 )
               },
             )
-            .whenComplete(
-              () => {
-                if (_wifiName != null) {_checkVenue()}
-              },
-            );
+            .whenComplete(() => checkVenueFuture = _checkVenue());
       }
     });
   }
@@ -300,41 +312,29 @@ class HomePageState extends State<HomePage> {
   }
 
   /// Confirm venue and fetch timetable
-  Future<void> _checkVenue() async {
-    setState(() {
-      message = "Please wait...";
-    });
-
+  Future<dynamic> _checkVenue() async {
     var response = await http.post(
       Uri.parse(ApiAddress.VENUE_API),
       body: {
         'reg_no': user.registration,
         'venue': _wifiName,
-        'imeis': user.imeis,
-        // 'timetable_id': session.timetableId
+        'imeis': user.imeis.toString(),
       },
     );
 
     print("Response: ${response.body}");
+
     if (response.body.isNotEmpty) {
       Map<String, dynamic> result = json.decode(response.body);
-
-      setState(() {
-        message = result['message'];
-      });
-
       if (result['status'].toString().contains("Ok")) {
         setState(() {
-          message = null;
           session = Session.fromJson(result);
-          print(session.toString());
         });
+        return result;
       }
-    } else {
-      setState(() {
-        message = 'Something went wrong..';
-      });
     }
+
+    return null;
   }
 
   /// Update user's attendance
@@ -343,8 +343,8 @@ class HomePageState extends State<HomePage> {
       Uri.parse(ApiAddress.ATTENDANCE_API),
       body: {
         'reg_no': user.registration,
-        'timetable_id': session.timetableId,
-        'imeis': user.imeis,
+        'timetable_id': session.timetableId.toString(),
+        'imeis': user.imeis.toString(),
       },
     );
 
@@ -352,11 +352,13 @@ class HomePageState extends State<HomePage> {
       Map<String, dynamic> result = json.decode(response.body);
       if (result['status'].toString().contains("Ok")) {
         setState(() {
+          session = session;
           session.isPresent = true;
         });
-      } else if (result['status'].toString().contains("Error")) {
-        print(result['message']);
       }
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(result['message'])));
     }
   }
 }
