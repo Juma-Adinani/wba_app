@@ -59,91 +59,133 @@ class _RegisterPageState extends State<RegisterPage> {
     Size size = MediaQuery.of(context).size;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Image.asset('assets/images/mu_logo.png', height: 100, width: 100),
-          SizedBox(
-            height: size.height * 0.035,
-            child: Align(
-              alignment: Alignment.center,
-              child: Text(
-                (_message == null) ? '' : _message,
-                style: TextStyle(color: Colors.red.shade600),
-              ),
-            ),
-          ),
-          Align(
-            alignment: Alignment.center,
-            child: Container(
-              margin: EdgeInsets.only(top: 16),
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-              child: Form(
-                key: _registerFormKey,
-                child: Column(
-                  children: <Widget>[
-                    TextFormField(
-                      validator: (value) {
-                        if (value.isEmpty) {
-                          return 'Please enter your registration.';
-                        }
-                        return null;
-                      },
-                      controller: regNumberController,
-                      decoration: InputDecoration(
-                          border: UnderlineInputBorder(),
-                          labelText: 'Registration'),
-                    ),
-                    TextFormField(
-                      obscureText: true,
-                      validator: (value) {
-                        if (value.isEmpty) {
-                          return 'Please enter your password.';
-                        }
-                        return null;
-                      },
-                      controller: passwordController,
-                      decoration: InputDecoration(
-                          border: UnderlineInputBorder(),
-                          labelText: 'Password'),
-                    ),
-                    Container(
-                        margin: EdgeInsets.only(top: 16),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            if (_registerFormKey.currentState.validate()) {
-                              _confirmRegNumber().whenComplete(
-                                () => {
-                                  if (user?.name != null)
-                                    {
-                                      setState(() {
-                                        _message = null;
-                                      }),
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => HomePage()),
-                                      )
-                                    }
-                                },
-                              );
-                              // .onError(
-                              //   (error, stackTrace) =>
-                              //       print("Something fishy"),
-                              // );
-                            }
-                          },
-                          child: Text('Register'),
-                        )),
-                  ],
+      body: Container(
+        height: double.infinity,
+        child: Column(
+          children: <Widget>[
+            SafeArea(
+              child: Container(
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.all(18),
+                child: Text(
+                  'LOGIN',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.amber[800],
+                    fontSize: 22.0,
+                  ),
                 ),
               ),
             ),
-          )
-        ],
+            SizedBox(
+              height: size.height * .1,
+            ),
+            Align(
+              alignment: Alignment.center,
+              child: Container(
+                margin: EdgeInsets.only(top: 16),
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                child: Column(
+                  children: [
+                    Image.asset(
+                      'assets/images/mu_logo.png',
+                      height: 100,
+                      width: 100,
+                    ),
+                    SizedBox(
+                      height: size.height * 0.035,
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          (_message == null) ? '' : _message,
+                          style: TextStyle(color: Colors.red.shade600),
+                        ),
+                      ),
+                    ),
+                    Form(
+                      key: _registerFormKey,
+                      child: Column(
+                        children: <Widget>[
+                          TextFormField(
+                            validator: (value) {
+                              if (value.isEmpty) {
+                                return 'Please enter your registration.';
+                              }
+                              return null;
+                            },
+                            controller: regNumberController,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide(width: .5),
+                                gapPadding: 1.0,
+                              ),
+                              labelText: 'Registration',
+                              prefixIcon: Icon(Icons.person),
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          TextFormField(
+                            obscureText: true,
+                            validator: (value) {
+                              if (value.isEmpty) {
+                                return 'Please enter your password.';
+                              }
+                              return null;
+                            },
+                            controller: passwordController,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide(width: .5),
+                                gapPadding: 1.0,
+                              ),
+                              labelText: 'Password',
+                              prefixIcon: Icon(Icons.lock),
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(top: 16),
+                            child: Container(
+                              width: double.infinity,
+                              child: RaisedButton(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: 16,
+                                  horizontal: 16,
+                                ),
+                                highlightColor: Colors.amber[800],
+                                child: Text('REGISTER'),
+                                onPressed: () {
+                                  if (_registerFormKey.currentState
+                                      .validate()) {
+                                    _confirmRegNumber().whenComplete(
+                                      () => {
+                                        if (user?.name != null)
+                                          {
+                                            setState(() {
+                                              _message = null;
+                                            }),
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      HomePage()),
+                                            )
+                                          }
+                                      },
+                                    );
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

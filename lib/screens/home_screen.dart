@@ -12,12 +12,18 @@ import 'package:connectivity/connectivity.dart';
 
 class HomePage extends StatefulWidget {
   @override
-  HomePageState createState() {
-    return HomePageState();
-  }
+  HomePageState createState() => HomePageState();
 }
 
 class HomePageState extends State<HomePage> {
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   StreamSubscription connectivitySubscription;
 
   List<String> deviceImeis;
@@ -49,118 +55,145 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Home'),
-                IconButton(
-                  icon: Icon(Icons.refresh),
-                  onPressed: () => setState(() {}),
-                )
-              ],
+      body:
+          _selectedIndex == 0 ? userDetails(context) : sessionDetails(context),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+              icon: Icon(Icons.verified_user), label: 'Profile'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.library_books), label: 'Session'),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.amber[800],
+        onTap: _onItemTapped,
+      ),
+    );
+  }
+
+  Column sessionDetails(BuildContext context) {
+    return Column(
+      children: [
+        SafeArea(
+          child: Container(
+            alignment: Alignment.centerLeft,
+            padding: EdgeInsets.all(18),
+            child: Text(
+              'SESSION',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.amber[800],
+                fontSize: 22.0,
+              ),
             ),
           ),
         ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Container(
-                  margin: EdgeInsets.only(bottom: 8),
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        margin: EdgeInsets.only(bottom: 8),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "User Details",
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontSize: Theme.of(context)
-                                    .textTheme
-                                    .headline6
-                                    .fontSize),
-                          ),
-                        ),
-                      ),
-                      buildUserDetailsTable()
-                    ],
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.only(bottom: 8),
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        margin: EdgeInsets.only(bottom: 8),
-                        child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text("Wifi Connection",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: Theme.of(context)
-                                        .textTheme
-                                        .headline6
-                                        .fontSize))),
-                      ),
-                      Table(
-                        children: [
-                          TableRow(children: [
-                            Text("Status: "),
-                            Text(
-                                _isWifiConnected ? "Connected" : "Disconnected")
-                          ]),
-                          TableRow(children: [
-                            Text("Name: "),
-                            Text((_wifiName != null) ? _wifiName : '')
-                          ]),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.only(bottom: 8),
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        margin: EdgeInsets.only(bottom: 8),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "Session Details",
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontSize: Theme.of(context)
-                                    .textTheme
-                                    .headline6
-                                    .fontSize),
-                          ),
-                        ),
-                      ),
-                      Visibility(
-                        visible: (message != null),
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Text(
-                            message ?? ' ',
-                            style: TextStyle(color: Colors.red.shade600),
-                          ),
-                        ),
-                      ),
-                      buildSessionDetailsTable(),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+        Container(
+          margin: EdgeInsets.all(18),
+          child: Column(
+            children: <Widget>[
+              Container(
+                margin: EdgeInsets.only(bottom: 8),
+                child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text("Wifi Connection",
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: Theme.of(context)
+                                .textTheme
+                                .headline6
+                                .fontSize))),
+              ),
+              Table(
+                children: [
+                  TableRow(children: [
+                    Text("Status: "),
+                    Text(_isWifiConnected ? "Connected" : "Disconnected")
+                  ]),
+                  TableRow(children: [
+                    Text("Name: "),
+                    Text((_wifiName != null) ? _wifiName : '')
+                  ]),
+                ],
+              ),
+            ],
           ),
-        ));
+        ),
+        Container(
+          margin: EdgeInsets.all(18),
+          child: Column(
+            children: <Widget>[
+              Container(
+                margin: EdgeInsets.only(bottom: 8),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Session Details",
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize:
+                            Theme.of(context).textTheme.headline6.fontSize),
+                  ),
+                ),
+              ),
+              Visibility(
+                visible: (message != null),
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    message ?? ' ',
+                    style: TextStyle(color: Colors.red.shade600),
+                  ),
+                ),
+              ),
+              buildSessionDetailsTable(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Column userDetails(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          margin: EdgeInsets.only(bottom: 8),
+          child: Column(
+            children: <Widget>[
+              SafeArea(
+                child: Container(
+                  alignment: Alignment.centerLeft,
+                  padding: EdgeInsets.all(18),
+                  child: Text(
+                    'PROFILE',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.amber[800],
+                      fontSize: 22.0,
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.all(18),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "User Details",
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize:
+                            Theme.of(context).textTheme.headline6.fontSize),
+                  ),
+                ),
+              ),
+              buildUserDetailsTable()
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   FutureBuilder buildSessionDetailsTable() {
@@ -168,63 +201,65 @@ class HomePageState extends State<HomePage> {
       future: checkVenueFuture,
       builder: (ctx, snapshot) {
         Widget output = Text("Something went wrong!");
-        if (snapshot.connectionState == ConnectionState.done) {
-          if (!snapshot.hasError && snapshot.data != null) {
-            if (snapshot.data['status'].toString().contains("Ok")) {
-              session = Session.fromJson(snapshot.data);
-              output = Column(
-                children: [
-                  Table(
-                    children: [
-                      TableRow(children: [
-                        Text("Venue: "),
-                        Text(session.venue),
-                      ]),
-                      TableRow(children: [
-                        Text("Subject: "),
-                        Text(session.subject),
-                      ]),
-                      TableRow(children: [
-                        Text("Programmes: "),
-                        Text(session.programme),
-                      ]),
-                      TableRow(children: [
-                        Text("Start: "),
-                        Text(session.start),
-                      ]),
-                      TableRow(children: [
-                        Text("End: "),
-                        Text(session.end),
-                      ]),
-                      TableRow(children: [
-                        Text("Attendance Status: "),
-                        Text(session.isPresent ? 'Present' : 'Absent'),
-                      ]),
-                    ],
-                  ),
-                  SizedBox(height: 40),
-                  (!session.isPresent)
-                      ? Container(
-                          margin: EdgeInsets.only(top: 16),
-                          child: ElevatedButton(
-                            onPressed: () {
-                              _confirmAttendance(context);
-                            },
-                            child: Text('Confirm your attendance'),
-                          ),
-                        )
-                      : Container(),
-                ],
-              );
-            } else if (snapshot.data['status'].toString().contains("Error")) {
-              output = Text(snapshot.data['message']);
-            }
+
+        if (snapshot.hasData) {
+          if (snapshot.data['status'].toString().contains("Ok")) {
+            session = Session.fromJson(snapshot.data);
+            output = Column(
+              children: [
+                Table(
+                  children: [
+                    TableRow(children: [
+                      Text("Venue: "),
+                      Text(session.venue),
+                    ]),
+                    TableRow(children: [
+                      Text("Subject: "),
+                      Text(session.subject),
+                    ]),
+                    TableRow(children: [
+                      Text("Programmes: "),
+                      Text(session.programme),
+                    ]),
+                    TableRow(children: [
+                      Text("Start: "),
+                      Text(session.start),
+                    ]),
+                    TableRow(children: [
+                      Text("End: "),
+                      Text(session.end),
+                    ]),
+                    TableRow(children: [
+                      Text("Attendance Status: "),
+                      Text(session.isPresent ? 'Present' : 'Absent'),
+                    ]),
+                  ],
+                ),
+                SizedBox(height: 40),
+                (!session.isPresent)
+                    ? Container(
+                        margin: EdgeInsets.only(top: 16),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            _confirmAttendance(context);
+                          },
+                          child: Text('Confirm your attendance'),
+                        ),
+                      )
+                    : Container(),
+              ],
+            );
+          } else if (snapshot.data['status'].toString().contains("Error")) {
+            output = Text(snapshot.data['message']);
+          } else if (snapshot.hasError) {
+            output = Text(snapshot.data['message']);
+          } else {
+            output = Center(
+              child: CircularProgressIndicator(),
+            );
           }
-        } else if (snapshot.connectionState == ConnectionState.waiting) {
-          output = Center(
-            child: CircularProgressIndicator(),
-          );
         }
+
         return output;
       },
     );

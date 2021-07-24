@@ -16,12 +16,12 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  var _registration;
+  Future<Object> registrationFuture;
 
   @override
   void initState() {
     super.initState();
-    readDetails();
+    registrationFuture = readDetails();
   }
 
   @override
@@ -30,17 +30,25 @@ class _MyAppState extends State<MyApp> {
       title: 'Attendance App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.amber, fontFamily: 'Quicksand'),
-      home: (_registration == null)
-          ? RegisterPage(title: 'Mzumbe Attendance Management')
-          : HomePage(),
+      home: FutureBuilder<Object>(
+        future: registrationFuture,
+        builder: (ctx, snapshot) {
+          Widget output = RegisterPage(title: 'Mzumbe Attendance Management');
+
+          if (snapshot.hasData) {
+            output = HomePage();
+          }
+
+          return output;
+        },
+      ),
     );
   }
 
   /// Read user's details from Shared Preferences
   Future<void> readDetails() async {
     var prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _registration = prefs.getString("registration");
-    });
+    var _registration = prefs.getString("registration");
+    return _registration;
   }
 }
