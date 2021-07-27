@@ -78,13 +78,26 @@ class HomePageState extends State<HomePage> {
           child: Container(
             alignment: Alignment.centerLeft,
             padding: EdgeInsets.all(18),
-            child: Text(
-              'SESSION',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.amber[800],
-                fontSize: 22.0,
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'SESSION',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.amber[800],
+                    fontSize: 22.0,
+                  ),
+                ),
+                IconButton(
+                  padding: const EdgeInsets.all(0.0),
+                  icon: Icon(
+                    Icons.refresh,
+                    color: Colors.amber.shade800,
+                  ),
+                  onPressed: () {},
+                ),
+              ],
             ),
           ),
         ),
@@ -158,13 +171,13 @@ class HomePageState extends State<HomePage> {
     return Column(
       children: [
         Container(
-          margin: EdgeInsets.only(bottom: 8),
+          margin: EdgeInsets.all(18),
           child: Column(
             children: <Widget>[
               SafeArea(
                 child: Container(
                   alignment: Alignment.centerLeft,
-                  padding: EdgeInsets.all(18),
+                  // padding: EdgeInsets.all(18),
                   child: Text(
                     'PROFILE',
                     style: TextStyle(
@@ -172,19 +185,6 @@ class HomePageState extends State<HomePage> {
                       color: Colors.amber[800],
                       fontSize: 22.0,
                     ),
-                  ),
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.all(18),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "User Details",
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize:
-                            Theme.of(context).textTheme.headline6.fontSize),
                   ),
                 ),
               ),
@@ -270,24 +270,87 @@ class HomePageState extends State<HomePage> {
       future: readDetailsFuture,
       builder: (ctx, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          return Table(
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TableRow(children: [Text("Name: "), Text(user.name)]),
-              TableRow(children: [Text("ID: "), Text(user.registration)]),
-              TableRow(
-                children: (user.role.toString().contains('student'))
-                    ? [Text("Programme: "), Text(user.programme)]
-                    : [Text(''), Text('')],
+              SizedBox(height: 25),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.person,
+                    size: 50.0,
+                    color: Colors.amber[800],
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    user.registration,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18.0,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    user.name.toUpperCase(),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22.0,
+                    ),
+                  ),
+                ],
               ),
-              TableRow(
-                children: (user.role.toString().contains('student'))
-                    ? [Text("Year of Study: "), Text(user.yearOfStudy)]
-                    : [Text(''), Text('')],
+              SizedBox(height: 30),
+              Text(
+                'Programme',
+                style: TextStyle(color: Colors.grey),
               ),
-              TableRow(
-                children: (user.role.toString().contains('student'))
-                    ? [Text("Semester: "), Text(user.semester)]
-                    : [Text(''), Text('')],
+              SizedBox(height: 5),
+              Text(
+                user.programme,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20.0,
+                ),
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Year of Study',
+                style: TextStyle(color: Colors.grey),
+              ),
+              SizedBox(height: 5),
+              Text(
+                user.yearOfStudy,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20.0,
+                ),
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Semester',
+                style: TextStyle(color: Colors.grey),
+              ),
+              SizedBox(height: 5),
+              Text(
+                user.role.toString().contains('student') ? user.semester : '',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20.0,
+                ),
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Role',
+                style: TextStyle(color: Colors.grey),
+              ),
+              SizedBox(height: 10),
+              Text(
+                user.role.toUpperCase(),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20.0,
+                ),
               ),
             ],
           );
