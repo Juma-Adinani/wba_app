@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:wba_mu/api/address.dart';
 import 'package:wba_mu/models/session.dart';
 import 'package:wba_mu/models/user.dart';
+import 'package:wba_mu/screens/register_screen.dart';
 import 'package:wifi_info_flutter/wifi_info_flutter.dart';
 import 'package:connectivity/connectivity.dart';
 
@@ -94,12 +95,94 @@ class HomePageState extends State<HomePage> {
                     fontSize: 22.0,
                   ),
                 ),
-                GestureDetector(
-                  onTap: _checkVenue,
-                  child: Icon(
-                    Icons.refresh,
-                    color: Colors.amber.shade800,
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: _checkVenue,
+                      child: Icon(
+                        Icons.refresh,
+                        color: Colors.amber.shade800,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        clearDetails().then(
+                          (value) => {
+                            if (value)
+                              {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => RegisterPage(),
+                                  ),
+                                  (route) => false,
+                                )
+                              }
+                          },
+                        );
+                      },
+                      child: Icon(
+                        Icons.logout,
+                        color: Colors.amber.shade800,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Card(
+          elevation: 5,
+          child: Container(
+            margin: EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  "Wifi Connection",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20.0,
                   ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text("Status: "),
+                    Text(
+                      _isWifiConnected ? "Connected" : "Disconnected",
+                      style: TextStyle(
+                        color: _isWifiConnected
+                            ? Colors.green[900]
+                            : Colors.red[900],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18.0,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 5,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text("Name: "),
+                    Text(
+                      (_wifiName != null) ? _wifiName : '-',
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -108,58 +191,7 @@ class HomePageState extends State<HomePage> {
         Card(
           elevation: 5,
           child: Container(
-            margin: EdgeInsets.all(12),
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    "Wifi Connection",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20.0,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text("Status: "),
-                      Text(
-                        _isWifiConnected ? "Connected" : "Disconnected",
-                        style: TextStyle(
-                          color: _isWifiConnected
-                              ? Colors.green[900]
-                              : Colors.red[900],
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 5,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text("Name: "),
-                      Text(
-                        (_wifiName != null) ? _wifiName : '',
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 30,
-                  ),
-                ]),
-          ),
-        ),
-        Card(
-          elevation: 5,
-          child: Container(
+            width: double.infinity,
             margin: EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,17 +244,62 @@ class HomePageState extends State<HomePage> {
                 child: Container(
                   alignment: Alignment.centerLeft,
                   // padding: EdgeInsets.all(18),
-                  child: Text(
-                    'PROFILE',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.amber[800],
-                      fontSize: 22.0,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'PROFILE',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.amber[800],
+                          fontSize: 22.0,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          clearDetails().then(
+                            (value) => {
+                              if (value)
+                                {
+                                  Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => RegisterPage(),
+                                    ),
+                                    (route) => false,
+                                  )
+                                }
+                            },
+                          );
+                        },
+                        child: Icon(
+                          Icons.logout,
+                          color: Colors.amber.shade800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              buildUserDetailsTable(),
+              SizedBox(
+                height: 20,
+              ),
+              Visibility(
+                visible: (session != null &&
+                    (!session.isPresent && session.isBelong)),
+                child: Center(
+                  child: Container(
+                    margin: EdgeInsets.only(top: 16),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _confirmAttendance(context);
+                      },
+                      child: Text('Confirm your attendance'),
                     ),
                   ),
                 ),
               ),
-              buildUserDetailsTable()
             ],
           ),
         ),
@@ -434,6 +511,12 @@ class HomePageState extends State<HomePage> {
     return user;
   }
 
+  /// Delete user's details from Shared Prefs during Logout
+  Future<bool> clearDetails() async {
+    var prefs = await SharedPreferences.getInstance();
+    return prefs.clear();
+  }
+
   /// Listen for wifi connectivity
   Future<void> listenForWifiConnection() async {
     connectivitySubscription = Connectivity()
@@ -478,6 +561,10 @@ class HomePageState extends State<HomePage> {
       session = null;
       sessionResult = null;
     });
+
+    if (!_isWifiConnected) {
+      return;
+    }
 
     var response = await http.post(
       Uri.parse(ApiAddress.VENUE_API),
