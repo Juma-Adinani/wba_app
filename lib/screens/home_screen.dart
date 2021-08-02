@@ -29,6 +29,7 @@ class HomePageState extends State<HomePage> {
   List<String> deviceImeis;
   User user;
   Session session;
+  dynamic sessionResult;
   var message;
   bool _isWifiConnected = false;
   var _wifiName;
@@ -76,8 +77,12 @@ class HomePageState extends State<HomePage> {
       children: [
         SafeArea(
           child: Container(
-            alignment: Alignment.centerLeft,
-            padding: EdgeInsets.all(18),
+            padding: const EdgeInsets.only(
+              top: 18,
+              left: 18,
+              right: 18,
+              bottom: 8,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -89,78 +94,107 @@ class HomePageState extends State<HomePage> {
                     fontSize: 22.0,
                   ),
                 ),
-                IconButton(
-                  padding: const EdgeInsets.all(0.0),
-                  icon: Icon(
+                GestureDetector(
+                  onTap: _checkVenue,
+                  child: Icon(
                     Icons.refresh,
                     color: Colors.amber.shade800,
                   ),
-                  onPressed: () {},
                 ),
               ],
             ),
           ),
         ),
-        Container(
-          margin: EdgeInsets.all(18),
-          child: Column(
-            children: <Widget>[
-              Container(
-                margin: EdgeInsets.only(bottom: 8),
-                child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text("Wifi Connection",
+        Card(
+          elevation: 5,
+          child: Container(
+            margin: EdgeInsets.all(12),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    "Wifi Connection",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20.0,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text("Status: "),
+                      Text(
+                        _isWifiConnected ? "Connected" : "Disconnected",
                         style: TextStyle(
-                            color: Colors.black,
-                            fontSize: Theme.of(context)
-                                .textTheme
-                                .headline6
-                                .fontSize))),
-              ),
-              Table(
-                children: [
-                  TableRow(children: [
-                    Text("Status: "),
-                    Text(_isWifiConnected ? "Connected" : "Disconnected")
-                  ]),
-                  TableRow(children: [
-                    Text("Name: "),
-                    Text((_wifiName != null) ? _wifiName : '')
-                  ]),
-                ],
-              ),
-            ],
+                          color: _isWifiConnected
+                              ? Colors.green[900]
+                              : Colors.red[900],
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text("Name: "),
+                      Text(
+                        (_wifiName != null) ? _wifiName : '',
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 30,
+                  ),
+                ]),
           ),
         ),
-        Container(
-          margin: EdgeInsets.all(18),
-          child: Column(
-            children: <Widget>[
-              Container(
-                margin: EdgeInsets.only(bottom: 8),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Session Details",
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize:
-                            Theme.of(context).textTheme.headline6.fontSize),
+        Card(
+          elevation: 5,
+          child: Container(
+            margin: EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  "Session Details",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20.0,
                   ),
                 ),
-              ),
-              Visibility(
-                visible: (message != null),
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    message ?? ' ',
-                    style: TextStyle(color: Colors.red.shade600),
+                SizedBox(
+                  height: 10,
+                ),
+                Visibility(
+                  visible: (message != null),
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Column(
+                      children: [
+                        Text(
+                          message ?? ' ',
+                          style: TextStyle(color: Colors.red.shade600),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              buildSessionDetailsTable(),
-            ],
+                buildSessionDetailsTable(),
+              ],
+            ),
           ),
         ),
       ],
@@ -202,62 +236,91 @@ class HomePageState extends State<HomePage> {
       builder: (ctx, snapshot) {
         Widget output = Text("Something went wrong!");
 
-        if (snapshot.hasData) {
-          if (snapshot.data['status'].toString().contains("Ok")) {
-            session = Session.fromJson(snapshot.data);
-            output = Column(
-              children: [
-                Table(
-                  children: [
-                    TableRow(children: [
-                      Text("Venue: "),
-                      Text(session.venue),
-                    ]),
-                    TableRow(children: [
-                      Text("Subject: "),
-                      Text(session.subject),
-                    ]),
-                    TableRow(children: [
-                      Text("Programmes: "),
-                      Text(session.programme),
-                    ]),
-                    TableRow(children: [
-                      Text("Start: "),
-                      Text(session.start),
-                    ]),
-                    TableRow(children: [
-                      Text("End: "),
-                      Text(session.end),
-                    ]),
-                    TableRow(children: [
-                      Text("Attendance Status: "),
-                      Text(session.isPresent ? 'Present' : 'Absent'),
-                    ]),
-                  ],
-                ),
-                SizedBox(height: 40),
-                (!session.isPresent)
-                    ? Container(
-                        margin: EdgeInsets.only(top: 16),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            _confirmAttendance(context);
-                          },
-                          child: Text('Confirm your attendance'),
-                        ),
-                      )
-                    : Container(),
-              ],
-            );
-          } else if (snapshot.data['status'].toString().contains("Error")) {
-            output = Text(snapshot.data['message']);
-          } else if (snapshot.hasError) {
-            output = Text(snapshot.data['message']);
-          } else {
+        switch (snapshot.connectionState) {
+          case ConnectionState.active:
+          case ConnectionState.none:
+          case ConnectionState.waiting:
             output = Center(
               child: CircularProgressIndicator(),
             );
-          }
+            break;
+          case ConnectionState.done:
+            if (session != null) {
+              output = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text("Venue: "),
+                      Text(session.venue),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text("Subject: "),
+                      Text(session.subject),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text("Programmes: "),
+                      Text(session.programme),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text("Start: "),
+                      Text(session.start),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text("End: "),
+                      Text(session.end),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text("Attendance Status: "),
+                      Text(
+                        session.isPresent ? 'PRESENT' : 'ABSENT',
+                        style: TextStyle(
+                          color: session.isPresent
+                              ? Colors.green[900]
+                              : Colors.red[900],
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            } else if (sessionResult != null) {
+              output = Text('${sessionResult['message']}');
+            }
+            break;
         }
 
         return output;
@@ -367,7 +430,7 @@ class HomePageState extends State<HomePage> {
   Future<User> readDetails() async {
     var prefs = await SharedPreferences.getInstance();
     user = User.fromSharedPrefs(prefs);
-    print("user from prefs: $user");
+    print("user from prefs: ${user.registration}");
     return user;
   }
 
@@ -411,6 +474,11 @@ class HomePageState extends State<HomePage> {
 
   /// Confirm venue and fetch timetable
   Future<dynamic> _checkVenue() async {
+    setState(() {
+      session = null;
+      sessionResult = null;
+    });
+
     var response = await http.post(
       Uri.parse(ApiAddress.VENUE_API),
       body: {
@@ -428,8 +496,13 @@ class HomePageState extends State<HomePage> {
         setState(() {
           session = Session.fromJson(result);
         });
-        return result;
+      } else {
+        setState(() {
+          session = null;
+          sessionResult = json.decode(response.body);
+        });
       }
+      return result;
     }
 
     return null;

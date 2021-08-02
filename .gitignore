@@ -31,6 +31,9 @@
 .pub/
 /build/
 
+# Address file
+lib/api/address.dart
+
 # Web related
 lib/generated_plugin_registrant.dart
 
