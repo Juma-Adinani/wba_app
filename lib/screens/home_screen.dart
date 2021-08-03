@@ -225,6 +225,24 @@ class HomePageState extends State<HomePage> {
                   ),
                 ),
                 buildSessionDetailsTable(),
+                SizedBox(
+                  height: 20,
+                ),
+                Visibility(
+                  visible: (session != null &&
+                      (!session.isPresent && session.isBelong)),
+                  child: Center(
+                    child: Container(
+                      margin: EdgeInsets.only(top: 16),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _confirmAttendance(context);
+                        },
+                        child: Text('Confirm your attendance'),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -282,24 +300,6 @@ class HomePageState extends State<HomePage> {
                 ),
               ),
               buildUserDetailsTable(),
-              SizedBox(
-                height: 20,
-              ),
-              Visibility(
-                visible: (session != null &&
-                    (!session.isPresent && session.isBelong)),
-                child: Center(
-                  child: Container(
-                    margin: EdgeInsets.only(top: 16),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        _confirmAttendance(context);
-                      },
-                      child: Text('Confirm your attendance'),
-                    ),
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -376,21 +376,24 @@ class HomePageState extends State<HomePage> {
                   SizedBox(
                     height: 10,
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text("Attendance Status: "),
-                      Text(
-                        session.isPresent ? 'PRESENT' : 'ABSENT',
-                        style: TextStyle(
-                          color: session.isPresent
-                              ? Colors.green[900]
-                              : Colors.red[900],
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18.0,
+                  Visibility(
+                    visible: user.role.toString().contains('student'),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text("Attendance Status: "),
+                        Text(
+                          session.isPresent ? 'PRESENT' : 'ABSENT',
+                          style: TextStyle(
+                            color: session.isPresent
+                                ? Colors.green[900]
+                                : Colors.red[900],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18.0,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               );
@@ -438,58 +441,71 @@ class HomePageState extends State<HomePage> {
                       fontSize: 22.0,
                     ),
                   ),
+                  SizedBox(height: 20),
+                  Text(
+                    user.role.toString().toUpperCase(),
+                    style: TextStyle(color: Colors.black),
+                  ),
                 ],
               ),
-              SizedBox(height: 30),
-              Text(
-                'Programme',
-                style: TextStyle(color: Colors.grey),
-              ),
-              SizedBox(height: 5),
-              Text(
-                user.programme,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20.0,
-                ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Year of Study',
-                style: TextStyle(color: Colors.grey),
-              ),
-              SizedBox(height: 5),
-              Text(
-                user.yearOfStudy,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20.0,
-                ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Semester',
-                style: TextStyle(color: Colors.grey),
-              ),
-              SizedBox(height: 5),
-              Text(
-                user.role.toString().contains('student') ? user.semester : '',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20.0,
-                ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Role',
-                style: TextStyle(color: Colors.grey),
-              ),
               SizedBox(height: 10),
-              Text(
-                user.role.toUpperCase(),
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20.0,
+              Visibility(
+                visible: user.role.toString().toLowerCase().contains('student'),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      'Programme',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                    SizedBox(height: 5),
+                    Text(
+                      user.programme ?? '',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20.0,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      'Year of Study',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                    SizedBox(height: 5),
+                    Text(
+                      user.yearOfStudy ?? '',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20.0,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      'Semester',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                    SizedBox(height: 5),
+                    Text(
+                      user.semester ?? '',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20.0,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      'Role',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      user.role.toUpperCase(),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20.0,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -608,10 +624,11 @@ class HomePageState extends State<HomePage> {
 
     if (response.body.isNotEmpty) {
       Map<String, dynamic> result = json.decode(response.body);
+      print("Result = $result");
       if (result['status'].toString().contains("Ok")) {
         setState(() {
-          session = session;
           session.isPresent = true;
+          print("Session is present = ${session.isPresent}");
         });
       }
 
